@@ -16,6 +16,10 @@
 using namespace std;
 using namespace glm;
 
+inline float area_of_triangle(vec2 *p1, vec2 *p2, vec2 *p3) {
+  return std::abs((p1->x*(p2->y - p3->y)+p2->x*(p3->y - p1->y) + p3->x*(p1->y - p2->y)) / 2);
+}
+
 int main() {
   uint8_t *data = (uint8_t*) malloc(sizeof(uint8_t) * WIDTH * HEIGHT * COLORCHANNEL);
   
@@ -25,17 +29,17 @@ int main() {
     vec2(100, 100), vec2(200, 100), vec2(200, 200),
   };
 
-  vector<vector<float>> lines;
-  for (int i = 0; i<vertices.size(); i+=3) {
-    lines.push_back({vertices[i].y - vertices[i+1].y, vertices[i+1].x - vertices[i].x, vertices[i+1].x * vertices[i].y - vertices[i].x * vertices[i+1].y});
-    lines.push_back({vertices[i].y - vertices[i+2].y, vertices[i+2].x - vertices[i].x, vertices[i+2].x * vertices[i].y - vertices[i].x * vertices[i+2].y});
-    lines.push_back({vertices[i+1].y - vertices[i+2].y, vertices[i+2].x - vertices[i+1].x, vertices[i+2].x * vertices[i+1].y - vertices[i+1].x * vertices[i+2].y});
-  }
   bool b = false;
   for (int y = 0; y<HEIGHT; y++) {
     for (int x = 0; x<WIDTH; x++) {
-      for (int i = 0; i<lines.size(); i+=3) {
-        if ((lines[i][0]*x + lines[i][1]*y - lines[i][2]) <= 0 && (lines[i+1][0]*x + lines[i+1][1]*y - lines[i+1][2]) >= 0 && (lines[i+2][0]*x + lines[i+2][1]*y - lines[i+2][2]) <= 0) {
+      for (int i = 0; i<vertices.size(); i+=3) {
+        vec2 p = glm::vec2(x,y);
+        float at = area_of_triangle(&vertices[i], &vertices[i+1], &vertices[i+2]);
+        float a1 = area_of_triangle(&p, &vertices[i], &vertices[i+1]);
+        float a2 = area_of_triangle(&p, &vertices[i+1], &vertices[i+2]);
+        float a3 = area_of_triangle(&p, &vertices[i], &vertices[i+2]);
+
+        if ((a1+a2+a3) == at) {
           data[index++] = 255;
           data[index++] = 255;
           data[index++] = 255;
